@@ -1,10 +1,10 @@
 # Smart Feedback Collection & Analysis System
 
-🚀 **Live Demo:** [https://smart-feedback-system-dmyi.onrender.com](https://smart-feedback-system-dmyi.onrender.com)
+ **Live Demo:** [https://smart-feedback-system-dmyi.onrender.com](https://smart-feedback-system-dmyi.onrender.com)
 
 A comprehensive feedback management platform that uses **AI (NLP)** to analyze user sentiment in real-time. Features a verified user system, glassmorphism UI, and an interactive admin dashboard.
 
-## 🌟 Features
+##  Features
 
 *   **Real-time Sentiment Analysis**: Automatically categorizes feedback as Positive, Neutral, or Negative using TextBlob.
 *   **User Verification**: dedicated profile verification flow for users to submit employment details (Name, Dept, Employee ID).
@@ -16,14 +16,14 @@ A comprehensive feedback management platform that uses **AI (NLP)** to analyze u
     *   **Admin**: View all users, verify profiles, see global stats.
     *   **User**: Submit feedback, view own history, request verification.
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 *   **Backend**: Flask (Python), SQLAlchemy
 *   **AI/ML**: TextBlob (Sentiment Analysis)
 *   **Frontend**: HTML5, CSS3 (Custom Glassmorphism), JavaScript
 *   **Database**: SQLite
 
-## 📦 Setup & Run
+##  Setup & Run
 
 1.  **Clone the repository**
     ```bash
