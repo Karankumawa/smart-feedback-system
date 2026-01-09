@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="glass-card">
+        <h2>{{ 'Register' if register_mode else 'Login' }}</h2>
+        <form action="{{ url_for('register') if register_mode else url_for('login') }}" method="POST">
+            <div class="input-group">
+                <input type="text" name="username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="btn-primary">{{ 'Sign Up' if register_mode else 'Sign In' }}</button>
+        </form>
+        <div class="auth-switch">
+            {% if register_mode %}
+            <p>Already have an account? <a href="{{ url_for('login') }}">Login</a></p>
+            {% else %}
+            <p>New here? <a href="{{ url_for('register') }}">Register</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

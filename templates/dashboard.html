@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="stats-overview animate-fade-in">
+        <div class="glass-card chart-container">
+            <h3 style="margin-top: 0;">Sentiment Overview</h3>
+            <div style="height: 250px; display: flex; justify-content: center; align-items: center;">
+                <canvas id="sentimentChart"></canvas>
+            </div>
+        </div>
+        <div class="glass-card stats-text delay-1">
+            <h3 style="margin-top: 0;">Quick Stats</h3>
+            <div
+                style="font-size: 3rem; font-weight: 700; background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                {{ feedbacks|length }}
+            </div>
+            <p style="color: var(--neutral); margin-top: 0;">Total Feedbacks Received</p>
+
+            <div style="margin-top: 2rem;">
+                <p>Latest Activity</p>
+                <div style="font-size: 0.9rem; color: var(--accent);">
+                    {% if feedbacks %}
+                    {{ feedbacks[0].timestamp.strftime('%B %d, %Y') }}
+                    {% else %}
+                    No activity yet
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if current_user.role == 'Admin' %}
+    <div class="glass-card animate-fade-in delay-2" style="margin-bottom: 2rem;">
+        <h3 style="margin-top: 0;">User Management</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-color);">
+                <thead>
+                    <tr style="border-bottom: 1px solid var(--glass-border); text-align: left;">
+                        <th style="padding: 1rem;">ID</th>
+                        <th style="padding: 1rem;">Username</th>
+                        <th style="padding: 1rem;">Full Name</th>
+                        <th style="padding: 1rem;">Department</th>
+                        <th style="padding: 1rem;">Emp ID</th>
+                        <th style="padding: 1rem;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in all_users %}
+                    <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+                        <td style="padding: 1rem;">{{ user.id }}</td>
+                        <td style="padding: 1rem;">{{ user.username }}</td>
+                        <td style="padding: 1rem;">{{ user.full_name or '-' }}</td>
+                        <td style="padding: 1rem;">{{ user.department or '-' }}</td>
+                        <td style="padding: 1rem;">{{ user.employee_id or '-' }}</td>
+                        <td style="padding: 1rem;">
+                            {% if user.is_verified %}
+                            <span class="sentiment-badge"
+                                style="background: rgba(52, 211, 153, 0.2); color: var(--success);">Verified</span>
+                            {% else %}
+                            <span class="sentiment-badge"
+                                style="background: rgba(148, 163, 184, 0.2); color: var(--neutral);">Pending</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    {% if not current_user.is_verified %}
+    <div class="glass-card animate-fade-in delay-1" style="margin-bottom: 2rem; border-color: var(--accent);">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h3 style="margin: 0; color: var(--accent);">Complete Your Profile</h3>
+                <p style="margin: 0.5rem 0 0; color: var(--neutral);">Please verify your employment details to access
+                    full features.</p>
+            </div>
+            <a href="{{ url_for('verify_profile') }}" class="btn-primary"
+                style="text-decoration: none; display: inline-block; width: auto;">Verify Now</a>
+        </div>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <div class="recent-feedback glass-card animate-fade-in delay-3">
+        <h3 style="margin-top: 0; margin-bottom: 2rem;">Recent Feedback</h3>
+        <ul class="feedback-list" id="feedbackList">
+            {% for feedback in feedbacks %}
+            <li class="feedback-item {{ feedback.sentiment_label.lower() }}">
+                <div>
+                    <span class="sentiment-badge">{{ feedback.sentiment_label }}</span>
+                    {% if current_user.role == 'Admin' and feedback.user %}
+                    <small style="margin-left: 0.5rem; color: var(--accent);">{{ feedback.user.username }} ({{
+                        feedback.user.department or 'Unknown' }})</small>
+                    {% endif %}
+                    <p class="content" style="margin: 0.5rem 0 0; font-size: 1.1rem;">{{ feedback.content }}</p>
+                </div>
+                <small class="date" style="color: var(--neutral); white-space: nowrap; margin-left: 1rem;">
+                    {{ feedback.timestamp.strftime('%Y-%m-%d %H:%M') }}
+                </small>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container animate-fade-in">
+    <div class="glass-card">
+        <h2 style="text-align: center; margin-bottom: 2rem;">Verify Profile</h2>
+        <form action="{{ url_for('verify_profile') }}" method="POST" class="glass-form">
+
+            <div class="input-group">
+                <input type="text" name="full_name" placeholder="Full Name" required
+                    value="{{ current_user.full_name or '' }}">
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="department" placeholder="Department" required
+                    value="{{ current_user.department or '' }}">
+            </div>
+
+            <div class="input-group">
+                <input type="text" name="employee_id" placeholder="Employee ID" required
+                    value="{{ current_user.employee_id or '' }}">
+            </div>
+
+            <button type="submit" class="btn-primary">Submit for Verification</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

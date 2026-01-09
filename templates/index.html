@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="hero animate-fade-in">
+    <h1>Share Your Experience{% if current_user.is_authenticated %}, <span
+            style="background: var(--primary-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">{{
+            current_user.username }}</span>{% endif %}</h1>
+    <p class="animate-fade-in delay-1">We analyze your feedback in real-time using advanced AI sentiment analysis.</p>
+</div>
+
+<div class="feedback-form-container animate-fade-in delay-2">
+    <div class="glass-card" style="max-width: 700px; margin: 0 auto; position: relative; overflow: hidden;">
+        <!-- decorative blur -->
+        <div
+            style="position: absolute; top: -50px; right: -50px; width: 100px; height: 100px; background: var(--accent); filter: blur(60px); opacity: 0.2;">
+        </div>
+
+        <form action="/" method="POST" class="glass-form">
+            <textarea name="content" placeholder="Type your honest feedback here... " required></textarea>
+            <button type="submit" class="btn-primary">Submit Analysis</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
