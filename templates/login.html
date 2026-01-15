@@ -8,6 +8,11 @@
             <div class="input-group">
                 <input type="text" name="username" placeholder="Username" required>
             </div>
+            {% if register_mode %}
+            <div class="input-group">
+                <input type="text" name="organization" placeholder="Organization/College" required>
+            </div>
+            {% endif %}
             <div class="input-group">
                 <input type="password" name="password" placeholder="Password" required>
             </div>

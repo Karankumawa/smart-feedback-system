@@ -11,6 +11,12 @@
     --danger: #fb7185;
 }
 
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
 body {
     margin: 0;
     font-family: 'Outfit', sans-serif;

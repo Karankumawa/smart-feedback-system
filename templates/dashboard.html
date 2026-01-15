@@ -32,7 +32,19 @@
 
     {% if current_user.role == 'Admin' %}
     <div class="glass-card animate-fade-in delay-2" style="margin-bottom: 2rem;">
-        <h3 style="margin-top: 0;">User Management</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+            <h3 style="margin: 0;">User Management</h3>
+            <form action="{{ url_for('dashboard') }}" method="GET" style="display: flex; gap: 0.5rem;">
+                <select name="sort_by" onchange="this.form.submit()"
+                    style="padding: 0.5rem; border-radius: 6px; background: rgba(255, 255, 255, 0.1); color: var(--text-color); border: 1px solid var(--glass-border);">
+                    <option value="timestamp" {% if sort_by=='timestamp' %}selected{% endif %}>Sort by Time</option>
+                    <option value="organization" {% if sort_by=='organization' %}selected{% endif %}>Sort by
+                        Organization</option>
+                    <option value="employee_id" {% if sort_by=='employee_id' %}selected{% endif %}>Sort by Emp ID
+                    </option>
+                </select>
+            </form>
+        </div>
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse; margin-top: 1rem; color: var(--text-color);">
                 <thead>
@@ -41,17 +53,20 @@
                         <th style="padding: 1rem;">Username</th>
                         <th style="padding: 1rem;">Full Name</th>
                         <th style="padding: 1rem;">Department</th>
+                        <th style="padding: 1rem;">Organization</th>
                         <th style="padding: 1rem;">Emp ID</th>
                         <th style="padding: 1rem;">Status</th>
+                        <th style="padding: 1rem;">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for user in all_users %}
                     <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
-                        <td style="padding: 1rem;">{{ user.id }}</td>
+                        <td style="padding: 1rem;">{{ loop.index }}</td>
                         <td style="padding: 1rem;">{{ user.username }}</td>
                         <td style="padding: 1rem;">{{ user.full_name or '-' }}</td>
                         <td style="padding: 1rem;">{{ user.department or '-' }}</td>
+                        <td style="padding: 1rem;">{{ user.organization or '-' }}</td>
                         <td style="padding: 1rem;">{{ user.employee_id or '-' }}</td>
                         <td style="padding: 1rem;">
                             {% if user.is_verified %}
@@ -61,6 +76,10 @@
                             <span class="sentiment-badge"
                                 style="background: rgba(148, 163, 184, 0.2); color: var(--neutral);">Pending</span>
                             {% endif %}
+                        </td>
+                        <td style="padding: 1rem;">
+                            <a href="{{ url_for('admin_update_user', user_id=user.id) }}"
+                                style="color: var(--primary); text-decoration: none;">Edit</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -92,8 +111,10 @@
                 <div>
                     <span class="sentiment-badge">{{ feedback.sentiment_label }}</span>
                     {% if current_user.role == 'Admin' and feedback.user %}
-                    <small style="margin-left: 0.5rem; color: var(--accent);">{{ feedback.user.username }} ({{
-                        feedback.user.department or 'Unknown' }})</small>
+                    <small style="margin-left: 0.5rem; color: var(--accent);">
+                        {{ feedback.user.username }}
+                        ({{ feedback.user.department or 'No Dept' }} | {{ feedback.user.organization or 'No Org' }})
+                    </small>
                     {% endif %}
                     <p class="content" style="margin: 0.5rem 0 0; font-size: 1.1rem;">{{ feedback.content }}</p>
                 </div>

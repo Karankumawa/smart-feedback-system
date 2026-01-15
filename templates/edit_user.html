@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="glass-card">
+        <h2>Edit User: {{ user.username }}</h2>
+        <form action="{{ url_for('admin_update_user', user_id=user.id) }}" method="POST">
+            <div class="input-group">
+                <label for="full_name" style="color: var(--text-color); margin-bottom: 0.5rem; display: block;">Full
+                    Name</label>
+                <input type="text" name="full_name" id="full_name" value="{{ user.full_name or '' }}"
+                    placeholder="Full Name">
+            </div>
+            <div class="input-group">
+                <label for="department"
+                    style="color: var(--text-color); margin-bottom: 0.5rem; display: block;">Department</label>
+                <input type="text" name="department" id="department" value="{{ user.department or '' }}"
+                    placeholder="Department">
+            </div>
+            <div class="input-group">
+                <label for="organization"
+                    style="color: var(--text-color); margin-bottom: 0.5rem; display: block;">Organization</label>
+                <input type="text" name="organization" id="organization" value="{{ user.organization or '' }}"
+                    placeholder="Organization">
+            </div>
+            <div class="input-group">
+                <label for="employee_id"
+                    style="color: var(--text-color); margin-bottom: 0.5rem; display: block;">Employee ID</label>
+                <input type="text" name="employee_id" id="employee_id" value="{{ user.employee_id or '' }}"
+                    placeholder="Employee ID">
+            </div>
+            <button type="submit" class="btn-primary">Update User</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

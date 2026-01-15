@@ -4,21 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Feedback System</title>
+    <title>Kritiflow: Smart Feedback System</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#0f766e">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{{ url_for('static', filename='sw.js') }}");
+            });
+        }
+    </script>
 </head>
 
 <body>
     <nav class="navbar">
-        <div class="logo">Smart Feedback System</div>
+        <div class="logo">Kritiflow: Smart Feedback System</div>
         <div class="nav-links">
             <a href="{{ url_for('index') }}">Home</a>
             {% if current_user.is_authenticated %}
             <a href="{{ url_for('dashboard') }}">Dashboard</a>
-            <a href="{{ url_for('logout') }}" class="btn-logout">Logout</a>
+            <a href="{{ url_for('profile') }}">Profile</a>
             {% else %}
             <a href="{{ url_for('login') }}">Login</a>
             <a href="{{ url_for('register') }}">Register</a>

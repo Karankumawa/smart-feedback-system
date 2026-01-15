@@ -12,13 +12,16 @@
             </div>
 
             <div class="input-group">
-                <input type="text" name="department" placeholder="Department" required
-                    value="{{ current_user.department or '' }}">
+                <input type="text" name="department" placeholder="Department"
+                    value="{{ current_user.department or '' }}" required>
             </div>
-
             <div class="input-group">
-                <input type="text" name="employee_id" placeholder="Employee ID" required
-                    value="{{ current_user.employee_id or '' }}">
+                <input type="text" name="organization" placeholder="Organization/College"
+                    value="{{ current_user.organization or '' }}" required>
+            </div>
+            <div class="input-group">
+                <input type="text" name="employee_id" placeholder="Employee ID / Roll No"
+                    value="{{ current_user.employee_id or '' }}" required>
             </div>
 
             <button type="submit" class="btn-primary">Submit for Verification</button>

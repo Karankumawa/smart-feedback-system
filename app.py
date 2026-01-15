@@ -3,12 +3,17 @@ from flask_login import LoginManager, login_user, login_required, logout_user, c
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db, User, Feedback
 from analysis import analyze_sentiment
+from dotenv import load_dotenv
 import os
+
+load_dotenv()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key_here'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['MONGODB_SETTINGS'] = {
+    'host': os.getenv('MONGODB_URI'),
+    'connect': False  # Allow lazy connection
+}
 
 db.init_app(app)
 login_manager = LoginManager()
@@ -17,15 +22,15 @@ login_manager.init_app(app)
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User.objects(pk=user_id).first()
 
+# Create Admin if not exists - Karan
+# We can't use app_context() quite the same way for create_all since Mongo is schemaless
+# But checking for admin is fine.
 with app.app_context():
-    db.create_all()
-    # Create Admin - Karan
-    if not User.query.filter_by(username='karan').first():
+    if not User.objects(username='karan').first():
         admin = User(username='karan', password_hash=generate_password_hash('karan'), role='Admin')
-        db.session.add(admin)
-        db.session.commit()
+        admin.save()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -33,10 +38,18 @@ def index():
         content = request.form.get('content')
         if content:
             label, score = analyze_sentiment(content)
-            user_id = current_user.id if current_user.is_authenticated else None
-            feedback = Feedback(content=content, sentiment_score=score, sentiment_label=label, user_id=user_id)
-            db.session.add(feedback)
-            db.session.commit()
+            user_instance = current_user if current_user.is_authenticated else None
+            
+            # Create feedback
+            # If user is None, field is nullable/optional in model?
+            # In ReferenceField, if we pass None, it should work if it's not required.
+            # In models.py we didn't set required=True for user.
+            
+            feedback = Feedback(content=content, sentiment_score=score, sentiment_label=label)
+            if user_instance:
+                feedback.user = user_instance
+            
+            feedback.save()
             flash('Thank you for your feedback!', 'success')
             return redirect(url_for('index'))
     return render_template('index.html')
@@ -46,7 +59,7 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        user = User.query.filter_by(username=username).first()
+        user = User.objects(username=username).first()
         if user and check_password_hash(user.password_hash, password):
             login_user(user)
             return redirect(url_for('dashboard'))
@@ -61,13 +74,13 @@ def register():
         password = request.form.get('password')
         hashed_password = generate_password_hash(password)
         
-        if User.query.filter_by(username=username).first():
+        if User.objects(username=username).first():
             flash('Username already exists', 'warning')
             return redirect(url_for('register'))
             
-        new_user = User(username=username, password_hash=hashed_password, role='User')
-        db.session.add(new_user)
-        db.session.commit()
+        organization = request.form.get('organization')
+        new_user = User(username=username, password_hash=hashed_password, role='User', organization=organization)
+        new_user.save()
         flash('Account created! You can now login', 'success')
         return redirect(url_for('login'))
     return render_template('login.html', register_mode=True)
@@ -78,16 +91,67 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
+@app.route('/change-password', methods=['GET', 'POST'])
+@login_required
+def change_password():
+    if request.method == 'POST':
+        current_password = request.form.get('current_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        
+        if not check_password_hash(current_user.password_hash, current_password):
+            flash('Incorrect current password', 'danger')
+            return redirect(url_for('change_password'))
+            
+        if new_password != confirm_password:
+            flash('New passwords do not match', 'danger')
+            return redirect(url_for('change_password'))
+            
+        current_user.password_hash = generate_password_hash(new_password)
+        current_user.save()
+        flash('Password updated successfully!', 'success')
+        return redirect(url_for('dashboard'))
+        
+    return render_template('change_password.html')
+
+@app.route('/admin/user/<user_id>/update', methods=['GET', 'POST'])
+@login_required
+def admin_update_user(user_id):
+    if current_user.role != 'Admin':
+        flash('Access denied', 'danger')
+        return redirect(url_for('dashboard'))
+        
+    user = User.objects(pk=user_id).first_or_404()
+    
+    if request.method == 'POST':
+        user.full_name = request.form.get('full_name')
+        user.department = request.form.get('department')
+        user.organization = request.form.get('organization')
+        user.employee_id = request.form.get('employee_id')
+        user.save()
+        flash('User details updated successfully', 'success')
+        return redirect(url_for('dashboard'))
+        
+    return render_template('edit_user.html', user=user)
+
 @app.route('/dashboard')
 @login_required
 def dashboard():
+    sort_by = request.args.get('sort_by', 'timestamp')
     all_users = []
+    
     if current_user.role == 'Admin':
-        feedbacks = Feedback.query.order_by(Feedback.timestamp.desc()).all()
-        all_users = User.query.all()
+        feedbacks = Feedback.objects.order_by('-timestamp')
+        
+        if sort_by == 'organization':
+            all_users = User.objects.order_by('organization')
+        elif sort_by == 'employee_id':
+             all_users = User.objects.order_by('employee_id')
+        else:
+            all_users = User.objects.all()
     else:
-        feedbacks = Feedback.query.filter_by(user_id=current_user.id).order_by(Feedback.timestamp.desc()).all()
-    return render_template('dashboard.html', feedbacks=feedbacks, all_users=all_users)
+        feedbacks = Feedback.objects(user=current_user).order_by('-timestamp')
+    return render_template('dashboard.html', feedbacks=feedbacks, all_users=all_users, sort_by=sort_by)
 
 @app.route('/verify-profile', methods=['GET', 'POST'])
 @login_required
@@ -95,29 +159,30 @@ def verify_profile():
     if request.method == 'POST':
         current_user.full_name = request.form.get('full_name')
         current_user.department = request.form.get('department')
+        current_user.organization = request.form.get('organization')
         current_user.employee_id = request.form.get('employee_id')
         current_user.is_verified = True
         
-        db.session.commit()
+        current_user.save()
         flash('Profile details updated successfully!', 'success')
         return redirect(url_for('dashboard'))
         
     return render_template('verify_profile.html')
 
+@app.route('/profile')
+@login_required
+def profile():
+    return render_template('profile.html')
+
 @app.route('/api/stats')
 def get_stats():
     # Public stats or protected? Let's make it public for simplicity or protected
-    # Let's verify if user is authenticated for real app, but for now open
-    # Aggregate data
-    if current_user.is_authenticated and current_user.role == 'Admin':
-         feedbacks = Feedback.query.all()
-    else:
-         # Guests/Users might only see their own or global trends? Let's show global trends
-         feedbacks = Feedback.query.all() 
+    feedbacks = Feedback.objects.all()
 
-    positive = len([f for f in feedbacks if f.sentiment_label == 'Positive'])
-    neutral = len([f for f in feedbacks if f.sentiment_label == 'Neutral'])
-    negative = len([f for f in feedbacks if f.sentiment_label == 'Negative'])
+    # Using pymongo/mongoengine logic, better to do aggregation but python list comp is fine for small scale
+    positive = feedbacks.filter(sentiment_label='Positive').count()
+    neutral = feedbacks.filter(sentiment_label='Neutral').count()
+    negative = feedbacks.filter(sentiment_label='Negative').count()
     
     return jsonify({
         'labels': ['Positive', 'Neutral', 'Negative'],
