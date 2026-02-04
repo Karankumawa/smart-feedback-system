@@ -26,8 +26,12 @@ A comprehensive feedback management platform that utilizes **AI (NLP)** to analy
 *   **Backend**: Flask (Python), SQLAlchemy / MongoEngine
 *   **Database**: MongoDB (via `flask-mongoengine`)
 *   **AI/ML**: TextBlob (Natural Language Processing)
-*   **Frontend**: HTML5, CSS3 (Custom Glass-morphism), JavaScript
+*   **Frontend**: HTML5, CSS3 (Custom Glassmorphism), JavaScript
 *   **Visualization**: Chart.js
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 📂 Project Structure
 
