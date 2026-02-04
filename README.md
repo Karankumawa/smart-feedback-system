@@ -2,7 +2,7 @@
 
 **Live Demo:** [https://smart-feedback-system-dmyi.onrender.com](https://smart-feedback-system-dmyi.onrender.com)
 
-A comprehensive feedback management platform that utilizes **AI (NLP)** to analyze user sentiment in real-time. Features a secure verified user system, a modern glassmorphism UI, and an interactive admin dashboard for data-driven insights.
+A comprehensive **Full Stack** feedback management platform that utilizes **AI (NLP)** to analyze user sentiment in real-time. Features a secure verified user system, a modern glassmorphism UI, and an interactive admin dashboard for data-driven insights. This project integrates a robust **Flask** backend with a dynamic **Frontend** and **MongoDB** database to deliver a seamless user experience.
 
 ## 🚀 Features
 
@@ -113,4 +113,4 @@ This application includes a `Procfile` for easy deployment on platforms like **R
 4.  Deploy!
 
 ---
-*Developed by Karan via Google DeepMind's Antigravity Agent*
+*Developed by Karan*
